@@ -1,0 +1,133 @@
+---
+title: "Final Project Assignment"
+author: "Weizi Wu"
+date: "2023-11-23"
+format: pdf
+editor: visual
+header-includes:
+  - \usepackage{indentfirst}
+  - \usepackage{setspace}
+  - \setlength\parindent{24pt}
+  - \doublespacing
+---
+
+1.Create a R Markdown
+
+As displayed, the title is "Final Project Assignment," authored by myself, with the date of when I started this assignment. The output format is PDF.
+
+2\. Course Review
+
+Throughout this class, I have acquired valuable skills in using R for data manipulation, visualization and communication. The knowledge I have gained has equipped me with the capability to conduct data analysis using R and visualization techniques, which marks a new beginning for my future data analysis endeavors.
+
+3\. Setting up working directory
+
+Before any data analysis, it's crucial to set the working directory to tell R where to look for files. Here, Knitr::\_chunk\$set() is used to specify any global settings to be applied to the R Markdown script.
+
+```{r setup}
+knitr::opts_chunk$set(include = TRUE)
+setwd("/Users/weiziwu/Desktop/EPSY-5195/dataset")
+```
+
+4.Packages installing or calling up
+
+Next, we installed or called up the necessary packages. It's important to note that we only need to install a package once, but we need to call it every time we reopen R. If you're using a package for the first time, please remove the "\#" annotation and run the installation code before loading the package for usage. For this project, I used four packages: tidyverse (for data tidying), Psycho (for descriptive analysis), ggplot2 (for plotting), and readxl (for importing data). Therefore, the command library() was used to tell R these packages I planed to use and then they were loaded into my library.
+
+```{r packages, warning=FALSE,message=FALSE}
+# install.packages("tidyr")
+# install.packages("psych")
+# install.packages("ggplot2")
+# install.packages("readr")
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+library(psych)
+```
+
+5\. Importing data and rename them
+
+Here, since the data is in xlsx format, we can use the read_xlsx function to import it. If the file is in a different format, such as csv or xls, we can use the read_csv or read_xls function instead. Once imported, we use the name assignment -\> to rename the data for analysis.
+
+```{r Importing}
+read_xlsx("/Users/weiziwu/Desktop/EPSY-5195/dataset/Single-sex Athletics.xlsx")->adata
+read_xlsx("/Users/weiziwu/Desktop/EPSY-5195/dataset/Single-sex Classes.xlsx")->cdata
+```
+
+6\. Tidy up
+
+Here, the problem of the variable "MIN-MAX" is Two variables in one column, so I used the function separate(data, "var1_var2", into=c(var1, var2)) to split the variable MIN and MAX into two columns and assign new names. I used colnames() to check the result.
+
+```{r tidyup}
+separate(adata, "MIN-MAX", into = c("MIN", "MAX"))->adata1
+colnames(adata1)
+```
+
+7\. Creating new variable
+
+Here, I planned to create a new variable to count the total number of single-sex classes. To achieve this, I used the function mutate(data, new_var = var1 + var2 +...) to sum up the totals of the existing columns. Next, I verified the new variable by using function colnames().
+
+```{r mutate}
+mutate(cdata, TOT_SSCLASSES=TOT_SSCLASSES_ALGG + TOT_SSCLASSES_OTHM + TOT_SSCLASSES_SCI + TOT_SSCLASSES_ENGL + TOT_SSCLASSES_OTHA)->cdata1
+colnames(cdata1)
+```
+
+8\. Merge files together
+
+Here, I planned to merge two files together and keep all observations even if there were no perfect matches, so I used the function full_join(data1,data2, by = "surrogate key"), which retains all observations from both datasets based on the common surrogate key. COMBOKEY, the "surrogate key", in both datasets is unique and has a one-to-one relationship between the datasets for accurate merging. Also, I used colnames() to check the newdata.
+
+```{r merge}
+full_join(adata,cdata1, by = "COMBOKEY")->acdata_full
+colnames(acdata_full)
+```
+
+9\. Scatterplot
+
+Here, I aimed to determine the correlation between the total number of participants in interscholastic activities and the total number of classes. My hypothesis was Schools with more academic classes would have fewer interscholastic athletic participants since students spent less time on these activities due to higher academic burdens. Using the combined dataset created earlier, I selected Total Participants as the dependent variable (Y) and Total Classes as the independent variable (X), and applied appropriate scaling.ggplot(data)+ geom_point(mapping=aes(x= , y= ))
+
+Furthermore, I utilized the labs function to label the title and X & Y axes for better clarity. Based on the graph, it seems that there is no significant relationship between the two variables.
+
+Data Visualization Principles Adherence:
+
+-   1). Proportional Size. Here, the scaling of both the X and Y axes accurately reflects the data.
+
+-   2). Add labels and explanations. Here, I labeled for both the X and Y axes and a title to provide context and overcome potential ambiguity.
+
+-   3). Maximise data-ink ratio. Here, the ink used to represent data rather than extraneous decoration.
+
+```{r scatterplot}
+library(ggplot2)
+ggplot(data=acdata_full) +
+  geom_point(mapping = aes(x=TOT_SSCLASSES, y=TOT_SSPART))+
+  scale_x_continuous(breaks = seq(0,750, by = 75)) +
+  scale_y_continuous(breaks = seq(0,2000, by = 200)) +
+  labs(
+    title = paste("Association between Total single-sex classes and total number of interscholastic participants"),
+    x = paste("Total number of classes"),
+    y = paste("Total number of interscholatic athletics participants"))
+```
+
+10\. Histogram to present distribution
+
+Here, I was interested in understanding the distribution of interscholastic athletic participants since it is considered as an outcome variable. To get a clear picture of the current status of interscholastic athletic participants, I used the geom_histogram function by ggplot packages ggplot(data)+ geom_histogram(mapping=aes(x= )) to present the distribution. I also utilized the lab() to add a title and name the x-axis. The histogram displayed a skewed right distribution shape.
+
+```{r histogram}
+ggplot(data=acdata_full) +
+  geom_histogram(mapping=aes(x = TOT_SSPART), binwidth=10)+
+  scale_x_continuous(breaks = seq(0,1500, by = 100)) +
+  labs(
+    title = paste("Distribution of total number of interscholastic participants"),
+    x = paste("Total number of interscholatic athletics participants"))
+```
+
+11\. Descriptive statistics
+
+Here, I used the describe(data) function to run descriptive statistics. I was surprised to find out that:
+
+1\) the minimum number of total classes (TOT_SSCLASSES) was -45 (what is the meaning of the negative value in the original dataset? It seems unusual and confusing.);
+
+2\) the total number of interscholastic participants (TOT_SSPART) varied greatly from 1 to 1843; and
+
+3\) All mean number of classes (cdata) for males only was higher than that for females.
+
+```{r descriptive}
+print(describe(acdata_full))
+```
