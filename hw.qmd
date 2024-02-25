@@ -25,7 +25,7 @@ Before any data analysis, it's crucial to set the working directory to tell R wh
 
 ```{r setup}
 knitr::opts_chunk$set(include = TRUE)
-setwd("/Users/weiziwu/Desktop/EPSY-5195/dataset")
+setwd("/Users/weiziwu/Desktop/Reproducibility_in_R/Chapter_5_HW")
 ```
 
 4.Packages installing or calling up
@@ -130,4 +130,15 @@ Here, I used the describe(data) function to run descriptive statistics. I was su
 
 ```{r descriptive}
 print(describe(acdata_full))
+```
+
+```{r somethingnew}
+url = "https://github.com/yrosseel/lavaan/raw/master/R/00class.R"
+# Download data
+download_data <- rio::import(url, format = "csv")
+# Show variable names
+names(download_data)
+# use describe() function to get descriptive statistics 
+library(psych)
+describe(download_data)
 ```
